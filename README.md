@@ -2,7 +2,7 @@
 
 ## Objective
 
-Your task is to refactor the `GetProductsController` without altering its existing functionality. 
+Your task is to refactor the `GetProductsController` without altering its existing functionality and fixing any bugs that you may find.
 
 ## Existing API Route
 
@@ -27,3 +27,7 @@ Test data is provided through seeders. After running the `php artisan migrate --
 ## Time Constraint
 
 While we understand the time-consuming nature of coding tasks, we kindly request that you limit yourself to a maximum of one to two hours on this task. Please do not worry if you can't complete the task within the stipulated time. Our primary interest is in assessing your problem-solving approach, not necessarily the end product. Any notes about your strategies for tackling this task, or your thoughts on potential improvements to the code, are greatly appreciated.
+
+## Submitting the Test
+
+The easiest way for all involved to review this test is via GitHub. We request that you Fork this project and then perform the "task" on your fork as a public repsoitory and then submit a link that that Fork back to us on email. Any notes on your strategy or improvements should be added to the your repository in a NOTES.md
