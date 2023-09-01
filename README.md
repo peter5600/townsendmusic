@@ -2,7 +2,7 @@
 
 ## Objective
 
-Your task is to refactor the `GetProductsController` without altering its existing functionality and fixing any bugs that you may find.
+Your task is to refactor the `GetProductsController` without altering its existing functionality.
 
 ## Existing API Route
 
