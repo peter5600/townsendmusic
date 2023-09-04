@@ -26,7 +26,7 @@ Test data is provided through seeders. After running the `php artisan migrate --
 
 ## Time Constraint
 
-While we understand the time-consuming nature of coding tasks, we kindly request that you limit yourself to a maximum of one to two hours on this task. Please do not worry if you can't complete the task within the stipulated time. Our primary interest is in assessing your problem-solving approach, not necessarily the end product. Any notes about your strategies for tackling this task, or your thoughts on potential improvements to the code, are greatly appreciated.
+While we understand the time-consuming nature of coding tasks, we kindly request that you limit yourself to a maximum of one to two hours on this task. Please do not worry if you can't complete the task within the stipulated time. Our primary interest is in assessing your problem-solving approach and your understanding of the Laravel framework and best practices, not necessarily the end product. Any notes about your strategies for tackling this task, or your thoughts on potential improvements to the code, are greatly appreciated.
 
 ## Submitting the Test
 
