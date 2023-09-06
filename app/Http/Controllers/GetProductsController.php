@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Actions\GetProductsAction;
 use App\Models\Artist;
+use App\Models\Section;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class GetProductsController extends Controller
@@ -196,7 +198,7 @@ class GetProductsController extends Controller
 
             if ($available == 1) {
                 $query = "SELECT name FROM artists WHERE id = '$artist_id'";
-                $artist = DB::select($query)[0]?->name;//This might just return null
+                $artist = DB::select($query)[0]?->name;
 
                 if (strlen($image_format) > 2) {
                     $products[$x]['image'] = $this->imagesDomain."/$main_id.".$image_format;
@@ -216,6 +218,10 @@ class GetProductsController extends Controller
             }
         }
         return $products;
+    }
+
+    public function returnProductsForSection(Section $section): JsonResponse{
+        return response()->json($section->products()->get());
     }
 
 

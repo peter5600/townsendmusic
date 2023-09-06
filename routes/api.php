@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    return $request->user();//Route login is not defined
 });
 
 Route::get('/products', \App\Http\Controllers\GetProductsController::class);
+Route::get('/products/{section}', [\App\Http\Controllers\GetProductsController::class, 'returnProductsForSection']);
