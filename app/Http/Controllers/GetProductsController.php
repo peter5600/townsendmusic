@@ -26,26 +26,65 @@ class GetProductsController extends Controller
         return $this->getStoreProductsBySectionWithPaginationAndSorting($this->storeId, '%', $_GET['number'] ?? null, $_GET['page'] ?? null, $_GET['sort'] ?? 0);
     }
 
+    /*What do i wanna do
+        Replace SQL query with eloquent
+    Split into functions so its more readable
+    */
 
-    private function returnResult(string $sort, string $section_field, string $section_compare, string $store_id): array{
+    public function getStoreProductsBySectionWithPaginationAndSorting($store_id, $section, $number = null, $page = null, $sort = 0)
+    {
+        if ($store_id == '') {
+            die;
+        }
+
+        if (!is_numeric($number) || $number < 1) {
+            $number = 8;
+        }
+
+        if (!is_numeric($page) || $page < 1) {
+            $page = 1;
+        }
+
+        $section_field = 'description';
+        $section_compare = 'LIKE';
+        if (is_numeric($section)) {
+            $section_field = 'id';
+            $section_compare = '=';
+        }
+
+        if ($sort === 0) {
+            $sort = "position";
+        }
+
+        list($result, $no_pages) = $this->returnResult($sort, $section_field, $section_compare, $store_id, $page, $number, $section);
+        $products = $this->returnProducts($result, $no_pages);
+
+        if (!empty($products)) {
+            return $products;
+        } else {
+            return false;
+        }
+    }
+
+    private function returnResult(string $sort, string $section_field, string $section_compare, string $store_id, $page, $number, $section): array{
         switch ($sort) {
             case "az":
-                $order = "ORDER BY name Asc";
-                break;
-            case "za":
                 $order = "ORDER BY name Desc";
                 break;
-            case "low":
-                $order = "ORDER BY price Asc";
+            case "za":
+                $order = "ORDER BY name Asc";
                 break;
-            case "high":
+            case "low":
                 $order = "ORDER BY price Desc";
                 break;
+            case "high":
+                $order = "ORDER BY price Asc";
+                break;
             case "old":
-                $order = "ORDER BY release_date Asc";
+                $order = "ORDER BY release_date Desc";
                 break;
             case "new":
-                $order = "ORDER BY release_date Desc";
+                $order = "ORDER BY release_date Asc";
                 break;
 
             default:
@@ -58,14 +97,12 @@ class GetProductsController extends Controller
         }
 
 
-        $products = array();
-        $x = 0;
 
         //Beginning of selection query used in 3 places below
         $query_start = "SELECT sp.id, artist_id, type, display_name, name, launch_date, remove_date, sp.description,
                                     available, price, euro_price, dollar_price, image_format, disabled_countries,release_date
                                 FROM store_products sp ";
-
+        $no_pages = null;
         if (isset($number) && isset($page) && $page != null) {
             $page = ($page-1)*$number;
             $pages = " LIMIT $page,$number";
@@ -87,7 +124,7 @@ class GetProductsController extends Controller
             $num_products = count($result);
 
             $no_pages = ceil($num_products/$number);
-            $products['pages'] = $no_pages;
+
         } else {
             if (isset($number)) {
                 $pages = " LIMIT $number";
@@ -105,18 +142,22 @@ class GetProductsController extends Controller
             $orderby = " ORDER BY store_products_section.position ASC, sp.position ASC, release_date DESC$pages";
         } else {
             $query .= "LEFT JOIN sections ON sections.id = -1 WHERE ";
-            $orderby = " ORDER BY position ASC, release_date DESC$pages";
         }
 
         $query .= " sp.store_id = '$store_id' AND deleted = '0' AND available = 1  ";
-        $query .= $orderby;
+        $query .= $order;
 
         $result = array_map('array_values', json_decode(json_encode(DB::select($query)), true));
-        return $result;
+        return array($result, $no_pages);
     }
 
-    private function returnProducts(array $result){
+    private function returnProducts(array $result, $no_pages){
         $date_time = time();
+        $x = 0;
+        $products = array();
+        if(!is_null($no_pages)){
+            $products['pages'] = $no_pages;
+        }
         while (list($main_id, $artist_id, $type, $display_name, $name, $launch_date, $remove_date, $description, $available, $price, $euro_price, $dollar_price, $image_format, $disabled_countries, $release_date) = array_pop($result)) {
             $artist = null;
 
@@ -175,46 +216,6 @@ class GetProductsController extends Controller
             }
         }
         return $products;
-    }
-
-    /*What do i wanna do
-        Replace SQL query with eloquent
-    Split into functions so its more readable
-    */
-
-    public function getStoreProductsBySectionWithPaginationAndSorting($store_id, $section, $number = null, $page = 'null', $sort = 0)
-    {
-        if ($store_id == '') {
-            die;
-        }
-
-        if (!is_numeric($number) || $number < 1) {
-            $number = 8;
-        }
-
-        if (!is_numeric($page) || $page < 1) {
-            $page = 1;
-        }
-
-        $section_field = 'description';
-        $section_compare = 'LIKE';
-        if (is_numeric($section)) {
-            $section_field = 'id';
-            $section_compare = '=';
-        }
-
-        if ($sort === 0) {
-            $sort = "position";
-        }
-
-        $result = $this->returnResult($sort, $section_field, $section_compare, $store_id);
-        $products = $this->returnProducts($result);
-
-        if (!empty($products)) {
-            return $products;
-        } else {
-            return false;
-        }
     }
 
 
