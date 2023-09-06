@@ -23,7 +23,8 @@ class GetProductsController extends Controller
 
     public function __invoke()
     {
-        return $this->getStoreProductsBySectionWithPaginationAndSorting($this->storeId, '%', $_GET['number'] ?? null, $_GET['page'] ?? null, $_GET['sort'] ?? 0);
+        //example section is 8408
+        return $this->getStoreProductsBySectionWithPaginationAndSorting($this->storeId, $_GET['section'] ?? '%', $_GET['number'] ?? null, $_GET['page'] ?? null, $_GET['sort'] ?? 0);
     }
 
     /*What do i wanna do
@@ -108,17 +109,16 @@ class GetProductsController extends Controller
             $pages = " LIMIT $page,$number";
 
             $query = $query_start;
-
             if ($section != '%' && strtoupper($section) != 'ALL') {
-
+                $sectionParse = is_numeric($section) ? $section : "'$section'";
                 $query .= "INNER JOIN store_products_section ON store_products_section.store_product_id = sp.id
                             INNER JOIN sections ON store_products_section.section_id = sections.id
-                            WHERE sections.$section_field $section_compare '$section' AND ";
+                            WHERE sections.$section_field $section_compare $sectionParse AND ";
 
             } else {
                 $query .= "LEFT JOIN sections ON sections.id = -1 WHERE ";
             }
-            $query.= " sp.store_id= '$store_id' AND deleted = '0' AND available = 1 ";
+            $query.= " sp.store_id= $store_id AND sp.deleted = 0 AND sp.available = 1 ";
 
             $result = DB::select($query);
             $num_products = count($result);
