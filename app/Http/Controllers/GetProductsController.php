@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\GetProductsAction;
+use App\Models\Artist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -25,31 +26,8 @@ class GetProductsController extends Controller
         return $this->getStoreProductsBySectionWithPaginationAndSorting($this->storeId, '%', $_GET['number'] ?? null, $_GET['page'] ?? null, $_GET['sort'] ?? 0);
     }
 
-    public function getStoreProductsBySectionWithPaginationAndSorting($store_id, $section, $number = null, $page = 'null', $sort = 0)
-    {
-        if ($store_id == '') {
-            die;
-        }
 
-        if (!is_numeric($number) || $number < 1) {
-            $number = 8;
-        }
-
-        if (!is_numeric($page) || $page < 1) {
-            $page = 1;
-        }
-
-        $section_field = 'description';
-        $section_compare = 'LIKE';
-        if (is_numeric($section)) {
-            $section_field = 'id';
-            $section_compare = '=';
-        }
-
-        if ($sort === 0) {
-            $sort = "position";
-        }
-
+    private function returnResult(string $sort, string $section_field, string $section_compare, string $store_id): array{
         switch ($sort) {
             case "az":
                 $order = "ORDER BY name Asc";
@@ -79,7 +57,7 @@ class GetProductsController extends Controller
                 break;
         }
 
-        $date_time = time();
+
         $products = array();
         $x = 0;
 
@@ -134,9 +112,13 @@ class GetProductsController extends Controller
         $query .= $orderby;
 
         $result = array_map('array_values', json_decode(json_encode(DB::select($query)), true));
+        return $result;
+    }
 
-
+    private function returnProducts(array $result){
+        $date_time = time();
         while (list($main_id, $artist_id, $type, $display_name, $name, $launch_date, $remove_date, $description, $available, $price, $euro_price, $dollar_price, $image_format, $disabled_countries, $release_date) = array_pop($result)) {
+            $artist = null;
 
             if ($launch_date != null && !isset($_SESSION['preview_mode'])) {
                 $launch = strtotime($launch_date);
@@ -173,7 +155,7 @@ class GetProductsController extends Controller
 
             if ($available == 1) {
                 $query = "SELECT name FROM artists WHERE id = '$artist_id'";
-                $artist = DB::select($query)[0]?->name;
+                $artist = DB::select($query)[0]?->name;//This might just return null
 
                 if (strlen($image_format) > 2) {
                     $products[$x]['image'] = $this->imagesDomain."/$main_id.".$image_format;
@@ -192,6 +174,41 @@ class GetProductsController extends Controller
                 $x++;
             }
         }
+        return $products;
+    }
+
+    /*What do i wanna do
+        Replace SQL query with eloquent
+    Split into functions so its more readable
+    */
+
+    public function getStoreProductsBySectionWithPaginationAndSorting($store_id, $section, $number = null, $page = 'null', $sort = 0)
+    {
+        if ($store_id == '') {
+            die;
+        }
+
+        if (!is_numeric($number) || $number < 1) {
+            $number = 8;
+        }
+
+        if (!is_numeric($page) || $page < 1) {
+            $page = 1;
+        }
+
+        $section_field = 'description';
+        $section_compare = 'LIKE';
+        if (is_numeric($section)) {
+            $section_field = 'id';
+            $section_compare = '=';
+        }
+
+        if ($sort === 0) {
+            $sort = "position";
+        }
+
+        $result = $this->returnResult($sort, $section_field, $section_compare, $store_id);
+        $products = $this->returnProducts($result);
 
         if (!empty($products)) {
             return $products;
