@@ -29,7 +29,7 @@ class GetProductsController extends Controller
         return $this->getStoreProductsBySectionWithPaginationAndSorting($this->storeId, $_GET['section'] ?? '%', $_GET['number'] ?? null, $_GET['page'] ?? null, $_GET['sort'] ?? 0);
     }
 
-    /*What do i wanted to do
+    /*What i wanted to do
         Replace SQL query with eloquent to improve safety
     */
 
